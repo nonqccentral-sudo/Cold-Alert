@@ -25,8 +25,8 @@ messaging.onBackgroundMessage((payload) => {
 
   const options = {
     body,
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
     vibrate: [400, 200, 400, 200, 400, 200, 400], // long/strong pattern, repeats via OS
     tag: `breach-${data.alertId}`,
     renotify: true,
