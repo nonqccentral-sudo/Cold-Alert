@@ -1,0 +1,68 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, Roboto, Segoe UI, sans-serif;
+  background: #0b0f14;
+  color: #f2f2f2;
+}
+.screen { padding: 24px; max-width: 480px; margin: 0 auto; }
+.hidden { display: none !important; }
+h1 { font-size: 1.4rem; margin-bottom: 4px; }
+.hint { color: #9aa5b1; font-size: 0.85rem; }
+.warning {
+  background: #241a0a; border: 1px solid #a66a10; color: #ffcf7a;
+  padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-top: 20px;
+}
+label { display: block; margin: 16px 0; font-size: 0.9rem; }
+input, select {
+  width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px;
+  border: 1px solid #2a3340; background: #121823; color: #f2f2f2; font-size: 1rem;
+}
+button {
+  width: 100%; padding: 14px; margin-top: 16px; border-radius: 10px; border: none;
+  background: #b00020; color: white; font-size: 1.05rem; font-weight: 600;
+  cursor: pointer;
+}
+button:active { background: #8a0019; }
+
+header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; }
+#logged-in-as { font-size: 0.8rem; color: #9aa5b1; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: #9aa5b1; }
+
+#alert-list { padding: 0 16px 16px; }
+.alert-card {
+  background: #1a1420; border: 1px solid #b00020; border-radius: 12px;
+  padding: 16px; margin-bottom: 12px;
+}
+.alert-card .title { font-weight: 700; font-size: 1.1rem; }
+.alert-card .meta { color: #cbd2d9; font-size: 0.85rem; margin: 6px 0 12px; }
+.alert-card button { background: #16a34a; }
+.alert-card button:active { background: #0f7a37; }
+
+/* ===== Full-screen alarm overlay ===== */
+#alarm-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #b00020;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px; overflow-y: auto;
+  animation: flash 1s infinite;
+}
+@keyframes flash {
+  0%, 100% { background: #b00020; }
+  50% { background: #6e0014; }
+}
+.alarm-banner {
+  font-size: 1.6rem; font-weight: 800; text-align: center; margin: 16px 0 24px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+#alarm-alert-list { width: 100%; max-width: 480px; }
+.alarm-alert-item {
+  background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+  color: white;
+}
+.alarm-alert-item .title { font-weight: 700; font-size: 1.1rem; }
+.alarm-alert-item .meta { font-size: 0.85rem; opacity: 0.9; margin: 6px 0 12px; }
+.alarm-alert-item button {
+  background: white; color: #b00020; font-weight: 800;
+}

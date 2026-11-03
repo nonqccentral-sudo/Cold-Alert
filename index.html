@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Temp Breach Alert</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#b00020" />
+<link rel="apple-touch-icon" href="./icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+<div id="setup-screen" class="screen">
+  <h1>🌡️ Temp Breach Alert</h1>
+  <p class="hint">One-time setup on this phone.</p>
+  <label>Your name
+    <input id="input-name" type="text" placeholder="e.g. Rahul Sharma" />
+  </label>
+  <label>Which sensor/location are you responsible for?
+    <input id="input-sensor" type="text" placeholder="Sensor ID, or leave blank for ALL" />
+  </label>
+  <label>Role
+    <select id="input-role">
+      <option value="Primary">Primary (notified immediately)</option>
+      <option value="Backup">Backup (notified if Primary doesn't ack in time)</option>
+    </select>
+  </label>
+  <button id="btn-register">Enable Alerts on This Phone</button>
+  <p id="setup-status" class="hint"></p>
+  <p class="warning">
+    ⚠️ Important: on iPhone, you must install this app via Safari's
+    "Add to Home Screen" first, then open it from the home screen icon
+    (not the browser tab) for alerts to work when the app is closed.
+    Also make sure notifications are allowed for this app in Settings.
+  </p>
+</div>
+
+<div id="main-screen" class="screen hidden">
+  <header>
+    <h1>🌡️ Temp Breach Alert</h1>
+    <span id="logged-in-as"></span>
+  </header>
+  <div id="no-alerts" class="empty-state">
+    <p>✅ No active breaches</p>
+    <p class="hint">You'll be alerted here — and by a full-volume alarm — the moment a breach comes in.</p>
+  </div>
+  <div id="alert-list"></div>
+</div>
+
+<!-- Full-screen alarm overlay, shown whenever there's >=1 active alert while the app is open -->
+<div id="alarm-overlay" class="hidden">
+  <div class="alarm-banner">🚨 TEMPERATURE BREACH 🚨</div>
+  <div id="alarm-alert-list"></div>
+  <button id="btn-silence-and-ack-all" class="hidden">Acknowledge All &amp; Silence</button>
+</div>
+
+<script src="./firebase-config.js"></script>
+<script src="./backend-client.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
