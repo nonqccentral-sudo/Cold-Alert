@@ -83,10 +83,17 @@ async function onRegisterClick() {
     }
 
     els.setupStatus.textContent = 'Registering this device...';
-    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    // register() resolves as soon as the SW is registered, but it may still
+    // be "installing" for a moment — getToken() needs an ACTIVE worker, so
+    // wait for navigator.serviceWorker.ready, which only resolves once the
+    // worker is active and controlling the page. This fixes the
+    // "Failed to execute 'subscribe' on 'PushManager': no active Service
+    // Worker" error.
+    const activeRegistration = await navigator.serviceWorker.ready;
     const token = await messaging.getToken({
       vapidKey: FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration
+      serviceWorkerRegistration: activeRegistration
     });
 
     if (!token) {
