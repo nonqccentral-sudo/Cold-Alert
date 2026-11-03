@@ -75,45 +75,81 @@ async function onRegisterClick() {
 
   els.setupStatus.textContent = 'Requesting notification permission...';
 
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      els.setupStatus.textContent = '❌ Notifications were not allowed. Please enable them in your phone/browser settings and try again.';
-      return;
-    }
+  // Each network step below is its own try/catch so the error message tells
+  // us exactly WHICH step failed, instead of a generic "Load failed" that
+  // could mean any of four different things. Don't collapse these back into
+  // one try block.
 
-    els.setupStatus.textContent = 'Registering this device...';
+  let permission;
+  try {
+    permission = await Notification.requestPermission();
+  } catch (err) {
+    console.error('[notif-permission]', err);
+    els.setupStatus.textContent = '❌ [permission] ' + err.message;
+    return;
+  }
+  if (permission !== 'granted') {
+    els.setupStatus.textContent = '❌ Notifications were not allowed. Please enable them in your phone/browser settings and try again.';
+    return;
+  }
+
+  els.setupStatus.textContent = 'Registering service worker...';
+  try {
     await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-    // register() resolves as soon as the SW is registered, but it may still
-    // be "installing" for a moment — getToken() needs an ACTIVE worker, so
-    // wait for navigator.serviceWorker.ready, which only resolves once the
-    // worker is active and controlling the page. This fixes the
-    // "Failed to execute 'subscribe' on 'PushManager': no active Service
-    // Worker" error.
-    const activeRegistration = await navigator.serviceWorker.ready;
-    const token = await messaging.getToken({
+  } catch (err) {
+    console.error('[sw-register]', err);
+    els.setupStatus.textContent = '❌ [sw-register] ' + err.message;
+    return;
+  }
+
+  els.setupStatus.textContent = 'Waiting for service worker to activate...';
+  let activeRegistration;
+  try {
+    activeRegistration = await navigator.serviceWorker.ready;
+  } catch (err) {
+    console.error('[sw-ready]', err);
+    els.setupStatus.textContent = '❌ [sw-ready] ' + err.message;
+    return;
+  }
+
+  els.setupStatus.textContent = 'Requesting push token from Firebase...';
+  let token;
+  try {
+    token = await messaging.getToken({
       vapidKey: FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: activeRegistration
     });
+  } catch (err) {
+    console.error('[get-token]', err);
+    els.setupStatus.textContent = '❌ [get-token] ' + err.message;
+    return;
+  }
 
-    if (!token) {
-      els.setupStatus.textContent = '❌ Could not get a push token. Try reinstalling the app from the home screen.';
+  if (!token) {
+    els.setupStatus.textContent = '❌ [get-token] No token returned. Try reinstalling the app from the home screen.';
+    return;
+  }
+
+  els.setupStatus.textContent = 'Registering device with backend...';
+  try {
+    const backendResult = await registerDeviceWithBackend(name, sensorId, role, token);
+    if (backendResult && backendResult.error) {
+      els.setupStatus.textContent = '❌ [backend] ' + backendResult.error;
       return;
     }
-
-    await registerDeviceWithBackend(name, sensorId, role, token);
-
-    const user = { name, sensorId, role };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    self.__lastKnownUserName = name; // best-effort, used by the SW's fallback ack
-
-    els.setupStatus.textContent = '✅ Registered! You will now receive alerts.';
-    showMainScreen(user);
-    startPolling();
   } catch (err) {
-    console.error(err);
-    els.setupStatus.textContent = '❌ Setup failed: ' + err.message;
+    console.error('[backend-register]', err);
+    els.setupStatus.textContent = '❌ [backend] ' + err.message;
+    return;
   }
+
+  const user = { name, sensorId, role };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  self.__lastKnownUserName = name; // best-effort, used by the SW's fallback ack
+
+  els.setupStatus.textContent = '✅ Registered! You will now receive alerts.';
+  showMainScreen(user);
+  startPolling();
 }
 
 function showMainScreen(user) {
